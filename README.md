@@ -9,8 +9,13 @@ The RC Car Practice project is a beginner-friendly web-based application designe
 
 本プロジェクトは、初心者がウェブベースのラジコン車シミュレーションを通じて、ラジコン操作の基本スキルを学習・練習できるように設計されています。
 
+
+Controls
+- Left stick up/down: Move forward/brake/back
+- Right stick left/right: Steering
+
 操作方法
-- 左スティック上下：　前進・更新
+- 左スティック上下：　前進・ブレーキ/後進
 - 右スティック左右：　ステアリング
 
 ## Development Note
