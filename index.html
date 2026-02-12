@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RC Car Practice</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="main-menu">
+        <h1>RC Car Practice</h1>
+        <button id="start-btn">Start Game</button>
+    </div>
+
+    <div id="course-select" style="display: none;">
+        <h1>Select Course</h1>
+        <div class="course-list">
+            <button class="course-btn" data-map="0">
+                <h3>Standard Practice</h3>
+                <p>Large open space with 2 pylons</p>
+            </button>
+            <button class="course-btn" data-map="1">
+                <h3>Oval Course</h3>
+                <p>Simple oval track with walls</p>
+            </button>
+        </div>
+        <button id="back-to-menu">Back to Menu</button>
+    </div>
+
+    <div id="game-container" style="display: none;">
+        <!-- Canvas will be added by Three.js -->
+        <div id="ui-layer">
+            <div id="instructions">
+                <h1>RC Car Practice</h1>
+                <p>Controls:</p>
+                <ul>
+                    <li><strong>Keyboard:</strong> WASD or Arrow Keys</li>
+                    <li><strong>Gamepad:</strong> Left Stick (Steer), R2/RT (Gas), L2/LT (Brake/Reverse)</li>
+                </ul>
+                <p>Press any key/button to start</p>
+            </div>
+            <div id="hud" style="display: none;">
+                <div id="speedometer">0 km/h</div>
+                <div id="gamepad-status" style="font-size: 1rem; color: #aaa;">🎮 No Controller</div>
+                <div id="timer">Time: 00:00</div>
+            </div>
+            <button id="options-btn"
+                style="position: absolute; top: 20px; right: 20px; padding: 10px; background: #333; color: white; border: 1px solid #555; cursor: pointer; pointer-events: auto;">⚙
+                Options</button>
+        </div>
+
+        <div id="options-modal"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 20;">
+            <div
+                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; padding: 20px; border-radius: 10px; min-width: 320px; max-height: 80vh; overflow-y: auto; color: white; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+                <h2 style="margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 10px;">Settings</h2>
+                <button id="close-options"
+                    style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: white; font-size: 2em; cursor: pointer; line-height: 0.5;">&times;</button>
+
+                <div style="margin: 15px 0;">
+                    <label>Max Speed: <span id="speed-val">100%</span></label>
+                    <input type="range" id="speed-slider" min="10" max="200" value="100" style="width: 100%;">
+                </div>
+                <div style="margin: 15px 0;">
+                    <label>Steering Sensitivity: <span id="steer-val">100%</span></label>
+                    <input type="range" id="steer-slider" min="10" max="200" value="100" style="width: 100%;">
+                </div>
+                <div style="margin: 15px 0;">
+                    <label>Brake Sensitivity: <span id="brake-val">100%</span></label>
+                    <input type="range" id="brake-slider" min="10" max="200" value="100" style="width: 100%;">
+                </div>
+                <div style="margin: 15px 0;">
+                    <label>Drag Brake: <span id="drag-brake-val">10%</span></label>
+                    <input type="range" id="drag-brake-slider" min="0" max="100" value="10" style="width: 100%;">
+                    <small style="color: #888;">0% = Coasting, 100% = Strong Braking at Neutral</small>
+                </div>
+
+                <hr style="border-color: #555; margin: 20px 0 10px;">
+                <h3 id="advanced-settings-header"
+                    style="margin: 0 0 10px; font-size: 1.1em; color: #ccc; cursor: pointer; user-select: none; background: #333; padding: 5px; border-radius: 5px;"
+                    onclick="document.getElementById('advanced-settings-container').style.display = document.getElementById('advanced-settings-container').style.display === 'none' ? 'block' : 'none'">
+                    Advanced Settings <span style="font-size: 0.8em; float: right;">▼</span>
+                </h3>
+
+                <div id="advanced-settings-container"
+                    style="display: none; padding-left: 10px; border-left: 2px solid #444;">
+                    <!-- EXP Settings -->
+                    <div style="margin: 15px 0;">
+                        <label>Forward EXP: <span id="fwd-exp-val">0%</span></label>
+                        <input type="range" id="fwd-exp-slider" min="-100" max="100" value="0" style="width: 100%;">
+                        <small style="color: #888;">-100% = Soft, 100% = Aggressive</small>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <label>Brake EXP: <span id="brake-exp-val">0%</span></label>
+                        <input type="range" id="brake-exp-slider" min="-100" max="100" value="0" style="width: 100%;">
+                        <small style="color: #888;">-100% = Soft, 100% = Aggressive</small>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <label>Steering EXP: <span id="steering-exp-val">0%</span></label>
+                        <input type="range" id="steering-exp-slider" min="-100" max="100" value="0"
+                            style="width: 100%;">
+                        <small style="color: #888;">-100% = Soft Center, 100% = Aggressive Center</small>
+                    </div>
+
+                    <!-- Endpoints / D/R -->
+                    <div style="margin: 15px 0;">
+                        <label>Forward Max: <span id="fwd-max-val">100%</span></label>
+                        <input type="range" id="fwd-max-slider" min="10" max="100" value="100" style="width: 100%;">
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <label>Reverse Max: <span id="rev-max-val">100%</span></label>
+                        <input type="range" id="rev-max-slider" min="10" max="100" value="100" style="width: 100%;">
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <label>Steering D/R: <span id="steer-dr-val">100%</span></label>
+                        <input type="range" id="steer-dr-slider" min="10" max="100" value="100" style="width: 100%;">
+                    </div>
+                </div>
+
+                <div style="margin: 20px 0 10px;">
+                    <label>Map: </label>
+                    <select id="map-select"
+                        style="width: 100%; padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px;">
+                        <option value="0">Standard Practice</option>
+                        <option value="1">Oval Course</option>
+                    </select>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button id="close-options-btn"
+                        style="padding: 10px 30px; font-size: 1em; cursor: pointer; background: #4CAF50; color: white; border: none; border-radius: 5px;"
+                        onclick="document.getElementById('options-modal').style.display='none'">Resume Game</button>
+                    <br><br>
+                    <small style="color: #aaa;">Press <b>ESC</b> to toggle menu</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Three.js (r128 for global script support) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script src="js/InputHandler.js"></script>
+    <script src="js/Track.js"></script>
+    <script src="js/Car.js"></script>
+    <script src="js/Game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
