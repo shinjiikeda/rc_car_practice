@@ -13,6 +13,7 @@ class InputHandler {
 
         this.throttle = 0; // -1 (reverse/brake) to 1 (gas)
         this.steering = 0; // -1 (left) to 1 (right)
+        this.profile = 'propo'; // 'propo' or 'single'
 
         window.addEventListener('keydown', (e) => {
             if (this.keys.hasOwnProperty(e.key)) {
@@ -67,8 +68,19 @@ class InputHandler {
             // Apply deadzone
             const deadzone = 0.1; // Lower deadzone
 
-            // Steering (Right Stick X = Axis 2, or D-Pad Left/Right)
-            const axisX = gp.axes[2];
+            // Profile-based axis selection
+            let axisX, axisY;
+            if (this.profile === 'single') {
+                // Left Stick Only (Axis 0 and 1)
+                axisX = gp.axes[0];
+                axisY = gp.axes[1];
+            } else {
+                // Propo-style (Right Stick X for steering, Left Stick Y for throttle)
+                axisX = gp.axes[2];
+                axisY = gp.axes[1];
+            }
+
+            // Steering (Axis X or D-Pad Left/Right)
             const dpadLeft = gp.buttons[14] && gp.buttons[14].pressed;
             const dpadRight = gp.buttons[15] && gp.buttons[15].pressed;
 
@@ -80,8 +92,7 @@ class InputHandler {
                 this.steering = 1;
             }
 
-            // Throttle/Brake (Axis 1 or D-Pad Up/Down)
-            const axisY = gp.axes[1];
+            // Throttle/Brake (Axis Y or D-Pad Up/Down)
             const dpadUp = gp.buttons[12] && gp.buttons[12].pressed;
             const dpadDown = gp.buttons[13] && gp.buttons[13].pressed;
 
@@ -93,5 +104,10 @@ class InputHandler {
                 this.throttle = -1;
             }
         }
+    }
+
+    setProfile(profile) {
+        this.profile = profile;
+        console.log(`Controller profile set to: ${profile}`);
     }
 }

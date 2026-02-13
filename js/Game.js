@@ -302,6 +302,13 @@ class Game {
             });
         }
 
+        const profileSelect = document.getElementById('controller-profile-select');
+        if (profileSelect) {
+            profileSelect.addEventListener('change', (e) => {
+                this.input.setProfile(e.target.value);
+            });
+        }
+
         if (mapSelect) {
             mapSelect.addEventListener('change', (e) => {
                 this.loadMap(e.target.value);
